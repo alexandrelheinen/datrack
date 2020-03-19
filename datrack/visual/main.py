@@ -1,25 +1,19 @@
 import pygame
 import numpy as np
 
-from .player import Player
+from .player import UserPlayer, CpuPlayer
 
 class MainWindow:
     """Application main window"""
 
     BLACK = (0, 0, 0)
 
-    PLAYER_SIZE = (10, 10)
-    CPU_SIZE = (7, 7)
-
     def __init__(self, args):
         npass, nfails = pygame.init()
         self.clock = pygame.time.Clock()
         self.screen = pygame.display.set_mode(args.size)
-        self.players = [Player((0, 0), self.PLAYER_SIZE, args.speed, True)]
-        self.players += [Player(np.random.randint(0, 300, 2),
-                                self.CPU_SIZE,
-                                args.speed,
-                                False)
+        self.players = [UserPlayer((0, 0), args.speed)]
+        self.players += [CpuPlayer.randomize(args.size, (0, 0), args.speed)
                          for _ in range(args.nplayers)]
         self.rate = 60
 
@@ -29,7 +23,7 @@ class MainWindow:
 
             key = pygame.key.get_pressed()
             for p in self.players:
-                p.handle_collision(self.players)
+                p.handle_players(self.players)
                 p.handle_key(key)
                 p.update(self.screen, 1. / self.rate)
 
