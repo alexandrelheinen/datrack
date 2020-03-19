@@ -3,8 +3,8 @@ from enum import IntEnum
 import numpy as np
 import math
 
-from .utils import reflect_vector
-from .common import Axis2D
+from ..utils import reflect_vector
+from ..common import Axis2D
 
 
 class Point:
@@ -13,11 +13,19 @@ class Point:
     def __init__(self):
         self.state = None  # Point state in any convenable unity
 
+    def predict(self, timestep, input):
+        """
+        Predict the model behaviour during a timestep and return it (but
+        do not update model state).
+        """
+        raise NotImplementedError("Propagation method is not implemented")
+
     def propagate(self, timestep, input):
         """
         Propagate the point state from a set of inputs throughout a timestep.
         """
         raise NotImplementedError("Propagation method is not implemented")
+
 
     def collide_with(self, obj):
         """Update the point state after a collision."""
@@ -45,17 +53,21 @@ class KinematicPoint(Point):
         self.set_state(initial_state)
         self.evolution_matrix = np.eye(self.n)
 
-    def propagate(self, timestep):
-        A = np.array([[timestep**(j - i) * self._factor(j - i)
-                       for j in range(self.n)]
-                      for i in range(self.n)])
-        self.state = A @ self.state
-
     def predict(self, timestep):
         A = np.array([[timestep**(j - i) * self._factor(j - i)
                        for j in range(self.n)]
                       for i in range(self.n)])
         return A @ self.state
+
+    def propagate(self, timestep):
+        self.state = self.predict(timestep)
+
+    def collide_with(self, normal):
+        if self.n == 0:
+            return
+        # TODO: enhance this definition
+        for i in range(1, self.n):
+            self.state[i] = reflect_vector(self.state[i], normal)
 
     def set_derivative(self, order, val):
         self.state[order] = val
@@ -71,36 +83,6 @@ class KinematicPoint(Point):
     def get_state(self):
         return np.copy(self.state)
 
-    def collide_with(self, normal):
-        if self.n == 0:
-            return
-        # TODO: enhance this definition
-        for i in range(1, self.n):
-            self.state[i] = reflect_vector(self.state[i], normal)
-
-
     @staticmethod
     def _factor(k):
         return (1./math.factorial(k)) if k >= 0 else 0
-
-
-if __name__ == '__main__':
-
-    ok = True
-    try:
-        x = KinematicPoint(5, np.zeros((3, 2)))
-        ok = False
-    except Exception as e:
-        print('ok 1')
-
-    x = KinematicPoint(3, np.zeros((3, 2)))
-    print(x.state)
-    for i in range(3):
-        print(i+1, ":")
-        print(x.predict(1.))
-        x.propagate(1.)
-        print(x.state)
-
-    x.collide_with(np.array((1., 0.)))
-    print('---')
-    print(x.state)

@@ -19,5 +19,3 @@ def rotate_vector(v, angle):
 def rotate_90(v):
     """Rotate a vector of 90 degrees (fast implementation)."""
     return np.array((v[Axis2D.Y], -v[Axis2D.X]))
-
-# TODO: test me
