@@ -1,8 +1,7 @@
-import argparse
 import pygame
 import numpy as np
 
-from player import Player
+from .player import Player
 
 class MainWindow:
     """Application main window"""
@@ -30,9 +29,9 @@ class MainWindow:
 
             key = pygame.key.get_pressed()
             for p in self.players:
-                p.handle_collision(self.screen, self.players)
+                p.handle_collision(self.players)
                 p.handle_key(key)
-                p.draw(self.screen, 1. / self.rate)
+                p.update(self.screen, 1. / self.rate)
 
             pygame.display.update()
             pygame.display.flip()
@@ -43,15 +42,3 @@ class MainWindow:
 
     def _has_quit_event(self):
         return pygame.QUIT in [event.type for event in pygame.event.get()]
-
-if __name__ == '__main__':
-    # TODO: add arguments
-    parser = argparse.ArgumentParser()
-    args = parser.parse_args()
-    args.size = (400, 300)
-    args.nplayers = 3
-    args.speed = 60
-
-    # Run the main window application
-    mw = MainWindow(args)
-    mw.run()
