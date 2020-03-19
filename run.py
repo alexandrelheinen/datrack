@@ -2,7 +2,7 @@
 import argparse
 
 from datrack.visual.main import MainWindow
-from datrack.physics.point import CinematicPoint
+from datrack.physics.point import KinematicPoint
 
 if __name__ == '__main__':
     # TODO: add arguments
